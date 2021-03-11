@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Objects;
 
 public class XClassLoader extends ClassLoader {
 
@@ -15,9 +16,10 @@ public class XClassLoader extends ClassLoader {
         return defineClass(name, bytes, 0, bytes.length);
     }
 
-    private byte[] decodeBytes(String name) {
+    private byte[] decodeBytes(String name) throws ClassNotFoundException {
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream(
                 name.replace('.', File.separatorChar) + ".xlass");
+        if (Objects.isNull(inputStream)) throw new ClassNotFoundException();
         byte[] buffer;
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         int nextValue;
@@ -34,7 +36,6 @@ public class XClassLoader extends ClassLoader {
 
     public static void main(String[] args) throws ClassNotFoundException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         XClassLoader loader = new XClassLoader();
-        System.out.println(loader.getClass().getClassLoader().getResource("Hello.xlass"));
         Class<?> clazz = loader.findClass("Hello");
         Object instance = clazz.newInstance();
         Method method = clazz.getMethod("hello");
